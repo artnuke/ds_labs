@@ -22,7 +22,7 @@ def solve_B(data):
     n = data.get("n")
     server_request_dict = {"l": l, 
                             "n" : n}
-    c = server_request(server_request_dict=server_request_dict, IP_ADDR = "10.1.0.5", PORT = 50003).get('answer')
+    c = server_request(server_request_dict=server_request_dict, IP_ADDR = "10.5.0.5", PORT = 50003).get('answer')
 
     B = c + k * (2 + m)
     server_answer_dict = {"answer" : B}

@@ -18,7 +18,7 @@ services:
       - "50003:50000"
     networks:
       ds_network:
-        ipv4_address: 10.5.0.3
+        ipv4_address: 10.5.0.5
 
 networks:
   ds_network:

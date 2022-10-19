@@ -39,7 +39,6 @@ def main(x, y, k, l ,m, n):
     f =  a + b 
     print(f"Answer: f(A + B) = {f}")
 
-
 x = 1
 y = 1
 

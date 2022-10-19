@@ -1,0 +1,29 @@
+version: "3.9"
+services:
+  server_a:
+    build: server_A
+    ports:
+      - "50000:50000"
+    networks:
+      - ds_network
+  server_b:
+    build: server_B
+    ports:
+      - "50001:50000"
+    networks:
+      - ds_network
+  server_c:
+    build: server_C
+    ports:
+      - "50003:50000"
+    networks:
+      ds_network:
+        ipv4_address: 10.5.0.3
+
+networks:
+  ds_network:
+    driver: bridge
+    ipam:
+      config:
+        - subnet: 10.5.0.0/16
+          gateway: 10.5.0.1

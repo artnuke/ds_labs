@@ -1,8 +1,10 @@
+from re import S
 import socket
 import json
 import concurrent.futures
 # import time
 import logging
+import threading
 
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
 logger = logging.getLogger(__name__)
@@ -27,9 +29,7 @@ def server_request(server_request_dict, IP_ADDR, PORT):
 def get_A(x, y):
     server_request_dict = { "x": x,
                         "y": y}
-    with concurrent.futures.ThreadPoolExecutor() as executor:
-        a = executor.submit(server_request, server_request_dict, IP_ADDR = "localhost", PORT = 50000)
-        answer = a.result()
+    answer = server_request(server_request_dict = server_request_dict, IP_ADDR = "localhost", PORT = 50000)
     A = answer.get("answer")
     return A
 
@@ -38,15 +38,16 @@ def get_B(k, l, m, n):
                         "l": l,
                         "m": m,
                         "n": n}
-    with concurrent.futures.ThreadPoolExecutor() as executor:
-        b = executor.submit(server_request, server_request_dict, IP_ADDR = "localhost", PORT = 50001)
-        answer = b.result()
+    answer = server_request(server_request_dict = server_request_dict, IP_ADDR = "localhost", PORT = 50001)
     B = answer.get("answer")
     return B
 
 def main(x, y, k, l ,m, n):
-    A = get_A(x, y)
-    B = get_B(k,l,m,n)
+    with concurrent.futures.ThreadPoolExecutor() as executor:
+        a = executor.submit(get_A, x, y)
+        b = executor.submit(get_B, k, l, m, n)
+        A = a.result()
+        B = b.result()
     f =  A + B
     print(f"Answer: f(A + B) = {f}")
 

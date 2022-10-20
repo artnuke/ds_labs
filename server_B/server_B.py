@@ -1,22 +1,28 @@
 import socket, json, time
 from threading import Thread
 import concurrent.futures
+import logging
 
+logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
+logger = logging.getLogger(__name__)
 
 
 
 def server_request(server_request_dict, IP_ADDR, PORT):
-    s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-    s.connect((IP_ADDR, PORT))
-    data_json = json.dumps(server_request_dict)
-    s.sendall(data_json.encode('utf-8'))
-    data_json = s.recv(1024)
-    s.close()
-    if data_json:
-        apod_dict = json.loads(data_json.decode())
-        return apod_dict
-    else:
-        print("No Answer") 
+    try:
+        s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        s.connect((IP_ADDR, PORT))
+        logging.info(f'Connecting to server... IP:PORT {IP_ADDR}:{PORT}')
+        data_json = json.dumps(server_request_dict)
+        s.sendall(data_json.encode('utf-8'))
+        data_json = s.recv(1024)
+        s.close()
+        if data_json:
+            logging.info(f'Code 200 from IP:PORT {IP_ADDR}:{PORT}')
+            apod_dict = json.loads(data_json.decode())
+            return apod_dict
+    except Exception as e:
+        logging.error(f'Error {e}')
 
 def solve_B(conn, data):
     k = data.get('k')
@@ -34,22 +40,25 @@ def solve_B(conn, data):
     data_json = json.dumps(server_answer_dict)
     conn.sendall(data_json.encode('utf-8'))
     conn.close()
-    print("Done")
+    logger.info(f"Request processed")
     return server_answer_dict
 
 def main():
-    print("... Is up")
+    logger.info("Running...")
+    PORT = 50000
     s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-    s.bind(('0.0.0.0', 50000))
+    s.bind(('0.0.0.0', PORT))
     s.listen()
+    logger.info(f"Server listening on port {PORT}")
     while(True):
-        print("working...")
+        logger.info(f"Running...")
         conn, addr = s.accept()
         data_json = conn.recv(1024)
         apod_dict = json.loads(data_json.decode())
         if data_json:
+            logger.info(f"Recive request, creating thread...")
             Thread(target = solve_B, args = (conn, apod_dict)).start()
 
 if __name__ == "__main__":
-    print("Staring Server B")
+    logger.info(f"SERVER B")
     main()

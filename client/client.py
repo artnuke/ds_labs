@@ -46,6 +46,7 @@ def main(x, y, k, l ,m, n):
     with concurrent.futures.ThreadPoolExecutor() as executor:
         a = executor.submit(get_A, x, y)
         b = executor.submit(get_B, k, l, m, n)
+        logging.info(f'Start Async Threading')
         A = a.result()
         B = b.result()
     f =  A + B

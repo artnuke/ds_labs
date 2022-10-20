@@ -1,7 +1,11 @@
 import socket, json, time
+from threading import Thread
+import concurrent.futures
+
+
+
 
 def server_request(server_request_dict, IP_ADDR, PORT):
-
     s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     s.connect((IP_ADDR, PORT))
     data_json = json.dumps(server_request_dict)
@@ -14,18 +18,23 @@ def server_request(server_request_dict, IP_ADDR, PORT):
     else:
         print("No Answer") 
 
-
-def solve_B(data):
+def solve_B(conn, data):
     k = data.get('k')
     m = data.get('m')
     l = data.get("l")
     n = data.get("n")
     server_request_dict = {"l": l, 
                             "n" : n}
-    c = server_request(server_request_dict=server_request_dict, IP_ADDR = "10.5.0.5", PORT = 50003).get('answer')
-
-    B = c + k * (2 + m)
+    with concurrent.futures.ThreadPoolExecutor() as executor:
+        a = executor.submit(server_request, server_request_dict, IP_ADDR = "10.5.0.5", PORT = 50003)
+        C = a.result().get('answer')
+    B = C + k * (2 + m)
     server_answer_dict = {"answer" : B}
+    time.sleep(2)
+    data_json = json.dumps(server_answer_dict)
+    conn.sendall(data_json.encode('utf-8'))
+    conn.close()
+    print("Done")
     return server_answer_dict
 
 def main():
@@ -37,21 +46,10 @@ def main():
         print("working...")
         conn, addr = s.accept()
         data_json = conn.recv(1024)
-       
+        apod_dict = json.loads(data_json.decode())
         if data_json:
-            print("Processing request")
-            apod_dict = json.loads(data_json.decode())
-            print(apod_dict)
-            server_answer_dict = solve_B(data = apod_dict)
-            print(server_answer_dict)
-            time.sleep(2)
-            
-            data_json = json.dumps(server_answer_dict)
-            conn.sendall(data_json.encode('utf-8'))
-            print("Done")
-        conn.close()
+            Thread(target = solve_B, args = (conn, apod_dict)).start()
 
-    
 if __name__ == "__main__":
     print("Staring Server B")
     main()

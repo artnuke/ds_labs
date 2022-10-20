@@ -1,8 +1,11 @@
 import socket
 import json
+import concurrent.futures
+
+
+
 
 def server_request(server_request_dict, IP_ADDR, PORT):
-
     s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     s.connect((IP_ADDR, PORT))
     data_json = json.dumps(server_request_dict)
@@ -18,7 +21,9 @@ def server_request(server_request_dict, IP_ADDR, PORT):
 def get_A(x, y):
     server_request_dict = { "x": x,
                         "y": y}
-    answer = server_request(server_request_dict = server_request_dict, IP_ADDR = "localhost", PORT = 50000)
+    with concurrent.futures.ThreadPoolExecutor() as executor:
+        a = executor.submit(server_request, server_request_dict, IP_ADDR = "localhost", PORT = 50000)
+        answer = a.result()
     A = answer.get("answer")
     return A
 
@@ -27,24 +32,31 @@ def get_B(k, l, m, n):
                         "l": l,
                         "m": m,
                         "n": n}
-    answer = server_request(server_request_dict = server_request_dict, IP_ADDR = "localhost", PORT = 50001)
+    with concurrent.futures.ThreadPoolExecutor() as executor:
+        a = executor.submit(server_request, server_request_dict, IP_ADDR = "localhost", PORT = 50001)
+        answer = a.result()
     B = answer.get("answer")
     return B
 
 def main(x, y, k, l ,m, n):
-    a = get_A(x, y)
-    print (f"A: {a}")
-    b = get_B(k,l,m,n)
-    print (f"B: {b}")
-    f =  a + b 
+    # a = Thread(target = get_A, args = (x, y)).start()
+
+    A = get_A(x, y)
+    print (f"A: {A}")
+    B = get_B(k,l,m,n)
+    print (f"B: {B}")
+    f =  A + B
     print(f"Answer: f(A + B) = {f}")
 
-x = 1
-y = 1
 
-k = 1
-l = 2
-m = 3
-n = 4
-print("Start")
-main(x, y, k, l ,m, n)
+
+if __name__ == "__main__":
+    print("Start")
+    x = 1
+    y = 2
+
+    k = 1
+    l = 2
+    m = 3
+    n = 4
+    main(x, y, k, l ,m, n)

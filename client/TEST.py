@@ -48,7 +48,7 @@ def main(x, y, k, l ,m, n):
         A = a.result()
         # B = b.result()
     f =  A
-    print(f"Answer: f(A + B) = {f}")
+    print(f"id {id} Answer: f(A + B) = {f}")
 
 if __name__ == "__main__":
     logging.info('Starting...')
@@ -59,7 +59,8 @@ if __name__ == "__main__":
     l = randint(0, 10)
     m = randint(0, 10)
     n = randint(0, 10)
-
+    id = randint(0, 10)
+    
     logging.info(f'x = {x}, y = {y}, k = {k}, l = {l}, m = {m}, n = {n}')
 
     main(x, y, k, l, m, n)

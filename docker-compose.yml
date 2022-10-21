@@ -5,17 +5,19 @@ services:
     ports:
       - "50000:50000"
     networks:
-      - ds_network
+      ds_network:
+        ipv4_address: 10.5.0.2
   server_b:
     build: server_B
     ports:
-      - "50001:50000"
+      - "50001:50001"
     networks:
-      - ds_network
+      ds_network:
+        ipv4_address: 10.5.0.3
   server_c:
     build: server_C
     ports:
-      - "50003:50000"
+      - "50002:50002"
     networks:
       ds_network:
         ipv4_address: 10.5.0.5

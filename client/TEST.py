@@ -2,7 +2,7 @@ import socket
 import json
 import concurrent.futures
 import logging
-import time
+from random import randint
 
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
 logger = logging.getLogger(__name__)
@@ -31,35 +31,34 @@ def get_A(x, y):
     A = answer.get("answer")
     return A
 
-def get_B(k, l, m, n):
-    server_request_dict = { "k": k,
-                        "l": l,
-                        "m": m,
-                        "n": n}
-    answer = server_request(server_request_dict = server_request_dict, IP_ADDR = "localhost", PORT = 50001)
-    B = answer.get("answer")
-    return B
+# def get_B(k, l, m, n):
+#     server_request_dict = { "k": k,
+#                         "l": l,
+#                         "m": m,
+#                         "n": n}
+#     answer = server_request(server_request_dict = server_request_dict, IP_ADDR = "localhost", PORT = 50001)
+#     B = answer.get("answer")
+#     return B
 
 def main(x, y, k, l ,m, n):
-    time.sleep(3)
     with concurrent.futures.ThreadPoolExecutor() as executor:
         a = executor.submit(get_A, x, y)
-        b = executor.submit(get_B, k, l, m, n)
+        # b = executor.submit(get_B, k, l, m, n)
         logging.info(f'Start Async Threading')
         A = a.result()
-        B = b.result()
-    f =  A + B
+        # B = b.result()
+    f =  A
     print(f"Answer: f(A + B) = {f}")
 
 if __name__ == "__main__":
     logging.info('Starting...')
 
-    x = 1
-    y = 2
-    k = 1
-    l = 2
-    m = 3
-    n = 4
+    x = randint(0, 10)
+    y = randint(0, 10)
+    k = randint(0, 10)
+    l = randint(0, 10)
+    m = randint(0, 10)
+    n = randint(0, 10)
 
     logging.info(f'x = {x}, y = {y}, k = {k}, l = {l}, m = {m}, n = {n}')
 

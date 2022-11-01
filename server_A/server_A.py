@@ -4,13 +4,18 @@ from threading import Thread
 import logging
 from queue import Queue
 import concurrent.futures
-
+import signal
+import sys
 
 
 
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
 logger = logging.getLogger(__name__)
 thraed_queue = Queue()
+
+def terminateProcess(signalNumber, frame):
+    logger.warning('(SIGTERM) terminating the process')
+    sys.exit(0)
 
 def solve_A(conn, data):
     x = data.get('x')
@@ -31,25 +36,29 @@ def listen():
     s.bind(('0.0.0.0', PORT))
     s.listen()
     logger.info(f"Server listening on port {PORT}")
-    while(True):
+    while True:
         logger.info(f"Running...")
         conn, addr = s.accept()
-        data_json = conn.recv(1024)
-        apod_dict = json.loads(data_json.decode())
-        if data_json:
-            logger.info(f"Recive request, creating thread...")
-            newThread = Thread(target = solve_A, args = (conn, apod_dict))
-            thraed_queue.put(newThread)
-            
+        item = (conn, addr)
+        thraed_queue.put(item)
 
+def proceed(conn_obj):
+    (conn, addr) = conn_obj
+    data_json = conn.recv(1024)
+    apod_dict = json.loads(data_json.decode())
+    if data_json:
+        logger.info(f"Recive request, creating thread...")
+        Thread(target = solve_A, args = (conn, apod_dict)).start()
+        
 def main():
-    with concurrent.futures.ThreadPoolExecutor() as executor:
+    with concurrent.futures.ThreadPoolExecutor(max_workers=8) as executor:
             executor.submit(listen)
             while True:
-                if thraed_queue.qsize() > 0:
+                if thraed_queue.qsize() > 3:
                     logger.info(f"Number of threads (Queue lengths): {thraed_queue.qsize()}")
-                    thraed_queue.get().start()
+                    proceed(thraed_queue.get())
 
 if __name__ == "__main__":
+    signal.signal(signal.SIGINT, terminateProcess)
     logger.info(f"SERVER A")
     main()

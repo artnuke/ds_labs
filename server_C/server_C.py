@@ -1,4 +1,4 @@
-import socket, json, time
+import socket, json, time, sys, signal
 from threading import Thread
 import logging
 from queue import Queue
@@ -6,10 +6,13 @@ import concurrent.futures
 
 
 
-
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
 logger = logging.getLogger(__name__)
 thraed_queue = Queue()
+
+def terminateProcess(signalNumber, frame):
+    logger.warning('(SIGTERM) terminating the process')
+    sys.exit(0)
 
 def solve_C(conn, data):
     l = data.get('l')
@@ -49,5 +52,6 @@ def main():
                     thraed_queue.get().start()
     
 if __name__ == "__main__":
+    signal.signal(signal.SIGINT, terminateProcess)
     print("Staring Server C")
     main()

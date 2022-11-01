@@ -1,15 +1,17 @@
-import socket, json, time
+import socket, json, time, sys
 from threading import Thread
 import concurrent.futures
 import logging
 from queue import Queue
-
-
+import signal
 
 
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
 logger = logging.getLogger(__name__)
 thraed_queue = Queue()
+def terminateProcess(signalNumber, frame):
+    logger.warning('(SIGTERM) terminating the process')
+    sys.exit(0)
 
 def server_request(server_request_dict, IP_ADDR, PORT):
     try:
@@ -62,7 +64,6 @@ def listen():
             logger.info(f"Recive request, creating thread...")
             newThread = Thread(target = solve_B, args = (conn, apod_dict))
             thraed_queue.put(newThread)
-            
 
 def main():
     with concurrent.futures.ThreadPoolExecutor() as executor:
@@ -73,5 +74,6 @@ def main():
                     thraed_queue.get().start()
 
 if __name__ == "__main__":
+    signal.signal(signal.SIGINT, terminateProcess)
     logger.info(f"SERVER B")
     main()
